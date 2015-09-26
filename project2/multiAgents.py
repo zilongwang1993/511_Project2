@@ -296,7 +296,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
     if isExpect:
       bestAction = random.choice(actions)
-      bestScore = sum(actionScores)/len(actionScores)
+      bestScore = sum(actionScores)/float(len(actionScores))
     else:
       bestActionIndex = actionScores.index(max(actionScores))
       bestAction = actions[bestActionIndex]
@@ -311,7 +311,46 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
   """
   "*** YOUR CODE HERE ***"
-  util.raiseNotDefined()
+  successorGameState = currentGameState
+  newPos = successorGameState.getPacmanPosition()
+  newFood = successorGameState.getFood()
+  newGhostStates = successorGameState.getGhostStates()
+  newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+
+  "*** YOUR CODE HERE ***"
+  score = successorGameState.getScore()
+  wallMap = successorGameState.getWalls()
+  foodMap = currentGameState.getFood()
+  height = foodMap.height
+  width = foodMap.width
+  foodPos= [(x,y) for x in range(width) for y in range(height) if foodMap[x][y]]
+  distMap = [[None]*height for x in range(width)]
+  # distMaps[(xFood, yFood)][x][y] should be the distance in the maze from (xFood, yFood) to (x, y)
+  offsets = [(-1, 0), (0, -1), (0, 1), (1, 0)]
+  # do BFS to fill the distMap
+  bfsQueue = util.Queue()
+  bfsQueue.push((newPos[0], newPos[1], 0))
+  while not bfsQueue.isEmpty():
+      x, y, dist = bfsQueue.pop()
+      if distMap[x][y] is None:
+          distMap[x][y] = dist
+          for dx, dy in offsets:
+              if not wallMap[x + dx][y + dy]:
+                  bfsQueue.push((x + dx, y + dy, dist + 1))
+
+  food_dists =[distMap[x_food][y_food] for x_food,y_food in foodPos]
+  ghost_dists =[distMap[int(x_g)][int(y_g)] for x_g,y_g in successorGameState.getGhostPositions()]
+  min_ghost_dist = min(ghost_dists)
+  ghost_score=300/(min_ghost_dist+1) if min_ghost_dist < 3 else 0
+
+  for i in range(len(newScaredTimes)):
+    if newScaredTimes[i] is not 0:
+      if ghost_dists[i] is min_ghost_dist:
+        ghost_score = -1*ghost_score
+
+  food_score = 30/((min(food_dists) if len(food_dists) > 0 else 0)+1)
+  newScore = 0 +food_score - ghost_score +sum(newScaredTimes) + successorGameState.getScore()
+  return newScore
 
 # Abbreviation
 better = betterEvaluationFunction
