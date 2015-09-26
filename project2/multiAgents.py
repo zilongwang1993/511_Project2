@@ -10,6 +10,7 @@ from util import manhattanDistance
 from game import Directions
 import random, util
 import math
+import random
 
 from game import Agent
 
@@ -269,7 +270,38 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
       legal moves.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    score, action = self.evaluateGameStateExpectimaxRecursive(gameState, self.depth, 0)
+    return action
+    
+  def evaluateGameStateExpectimaxRecursive(self, gameState, remainingDepth,agent):
+    if remainingDepth <= 0:
+      return self.evaluationFunction(gameState), Directions.STOP
+    if gameState.isLose() or gameState.isWin():
+      return self.evaluationFunction(gameState), Directions.STOP
+    
+    numAgents = gameState.getNumAgents()
+    isExpect = (agent != 0)
+    nextRemainingDepth = remainingDepth if agent + 1 < numAgents else remainingDepth - 1
+    nextAgent = agent + 1 if agent + 1 < numAgents else 0
+    
+    actions = gameState.getLegalActions(agent)
+    actions = [a for a in actions if a != Directions.STOP]
+    actionScores = []
+    if len(actions) == 0:
+      return self.evaluationFunction(gameState), Directions.STOP
+    for action in actions:
+      nextGameState = gameState.generateSuccessor(agent, action)
+      score, nextAction = self.evaluateGameStateExpectimaxRecursive(nextGameState, nextRemainingDepth, nextAgent)
+      actionScores.append(score)
+
+    if isExpect:
+      bestAction = random.choice(actions)
+      bestScore = sum(actionScores)/len(actionScores)
+    else:
+      bestActionIndex = actionScores.index(max(actionScores))
+      bestAction = actions[bestActionIndex]
+      bestScore = actionScores[bestActionIndex]
+    return bestScore, bestAction
 
 def betterEvaluationFunction(currentGameState):
   """
