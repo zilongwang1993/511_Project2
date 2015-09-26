@@ -187,7 +187,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
       return self.evaluationFunction(gameState), Directions.STOP
     for action in actions:
       nextGameState = gameState.generateSuccessor(agent, action)
-      score, nextAction = self.evaluateGameStateMinimaxRecursive(nextGameState, nextRemainingDepth, nextAgent)
+      score, _ = self.evaluateGameStateMinimaxRecursive(nextGameState, nextRemainingDepth, nextAgent)
       actionScores.append(score)
     
     bestActionIndex = actionScores.index(min(actionScores) if isAdversary else max(actionScores))
@@ -205,11 +205,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
       Returns the minimax action using self.depth and self.evaluationFunction
     """
     "*** YOUR CODE HERE ***"
-    score, action = self.evaluateGameStateMinimaxRecursive(gameState, self.depth, 0)
+    score, action = self.evaluateGameStateMinimaxRecursive(gameState, self.depth, 0, None, None)
     #print "Debug: score for the best action (" + str(action) + ")is " + str(score)
     return action
   
-  def evaluateGameStateMinimaxRecursive(self, gameState, remainingDepth, agent, pruneIfNotGreaterThan, pruneIfNotLessThan):
+  def evaluateGameStateMinimaxRecursive(self, gameState, remainingDepth, agent, alpha, beta):
     # returns score, action
     # example of a sequence of recursive calls:
     # (depth 2, agent 0) => (depth 2, agent 1) => (depth 2, agent 2) => (d1, a0) => (d1, a1) => (d1, a2) => (d0, a0)
@@ -228,14 +228,29 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     actionScores = []
     if len(actions) == 0:
       return self.evaluationFunction(gameState), Directions.STOP
+    
+    if isAdversary:
+      bestScore = beta # inf
+    else:
+      bestScore = alpha # -inf
+    bestAction = None
+    
     for action in actions:
       nextGameState = gameState.generateSuccessor(agent, action)
-      score, nextAction = self.evaluateGameStateMinimaxRecursive(nextGameState, nextRemainingDepth, nextAgent)
-      actionScores.append(score)
+      score, _ = self.evaluateGameStateMinimaxRecursive(nextGameState, nextRemainingDepth, nextAgent, alpha, beta)
+      if isAdversary: # min node
+        if bestScore is None or score < bestScore:
+          bestScore = beta = score
+          bestAction = action
+        if alpha is not None and bestScore <= alpha:
+          return alpha, bestAction
+      else: # max node
+        if bestScore is None or score > bestScore:
+          bestScore = alpha = score
+          bestAction = action
+        if beta is not None and bestScore >= beta:
+          return beta, bestAction
     
-    bestActionIndex = actionScores.index(min(actionScores) if isAdversary else max(actionScores))
-    bestAction = actions[bestActionIndex]
-    bestScore = actionScores[bestActionIndex]
     return bestScore, bestAction
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
