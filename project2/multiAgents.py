@@ -181,7 +181,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
     nextRemainingDepth = remainingDepth if agent + 1 < numAgents else remainingDepth - 1
     nextAgent = agent + 1 if agent + 1 < numAgents else 0
     
-    print "getLegalActions " + str(remainingDepth) + "," + str(agent)
+    #print "getLegalActions " + str(remainingDepth) + "," + str(agent)
     actions = gameState.getLegalActions(agent)
     actions = [a for a in actions if a != Directions.STOP]
     actionScores = []
