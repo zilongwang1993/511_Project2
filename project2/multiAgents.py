@@ -10,6 +10,7 @@ from util import manhattanDistance
 from game import Directions
 import random, util
 import math
+import random
 
 from game import Agent
 
@@ -287,12 +288,16 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
       return self.evaluationFunction(gameState), Directions.STOP
     for action in actions:
       nextGameState = gameState.generateSuccessor(agent, action)
-      score, nextAction = self.evaluateGameStateMinimaxRecursive(nextGameState, nextRemainingDepth, nextAgent)
+      score, nextAction = self.evaluateGameStateExpectimaxRecursive(nextGameState, nextRemainingDepth, nextAgent)
       actionScores.append(score)
-    
-    bestActionIndex = actionScores.index(sum(actionScores)/len(actionScores) if isExpect else max(actionScores))
-    bestAction = actions[bestActionIndex]
-    bestScore = actionScores[bestActionIndex]
+
+    if isExpect:
+      bestAction = random.choice(actions)
+      bestScore = sum(actionScores)/len(actionScores)
+    else:
+      bestActionIndex = actionScores.index(max(actionScores))
+      bestAction = actions[bestActionIndex]
+      bestScore = actionScores[bestActionIndex]
     return bestScore, bestAction
 
 def betterEvaluationFunction(currentGameState):
