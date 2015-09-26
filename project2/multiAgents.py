@@ -180,6 +180,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
     nextRemainingDepth = remainingDepth if agent + 1 < numAgents else remainingDepth - 1
     nextAgent = agent + 1 if agent + 1 < numAgents else 0
     
+    print "getLegalActions " + str(remainingDepth) + "," + str(agent)
     actions = gameState.getLegalActions(agent)
     actions = [a for a in actions if a != Directions.STOP]
     actionScores = []
@@ -234,19 +235,21 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     else:
       bestScore = alpha # -inf
     bestAction = None
+    nextAlpha = alpha
+    nextBeta = beta
     
     for action in actions:
       nextGameState = gameState.generateSuccessor(agent, action)
-      score, _ = self.evaluateGameStateMinimaxRecursive(nextGameState, nextRemainingDepth, nextAgent, alpha, beta)
+      score, _ = self.evaluateGameStateMinimaxRecursive(nextGameState, nextRemainingDepth, nextAgent, nextAlpha, nextBeta)
       if isAdversary: # min node
-        if bestScore is None or score < bestScore:
-          bestScore = beta = score
+        if bestScore is None or score < bestScore: # score is also smaller than nextBeta
+          bestScore = nextBeta = score
           bestAction = action
         if alpha is not None and bestScore <= alpha:
           return alpha, bestAction
       else: # max node
-        if bestScore is None or score > bestScore:
-          bestScore = alpha = score
+        if bestScore is None or score > bestScore: # score is also bigger than nextAlpha
+          bestScore = nextAlpha = score
           bestAction = action
         if beta is not None and bestScore >= beta:
           return beta, bestAction
