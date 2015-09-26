@@ -126,7 +126,38 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns the total number of agents in the game
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    score, action = self.evaluateGameStateMinimaxRecursive(gameState, self.depth, 0)
+    #print "Debug: score for the best action (" + str(action) + ")is " + str(score)
+    return action
+  
+  def evaluateGameStateMinimaxRecursive(self, gameState, remainingDepth, agent):
+    # returns score, action
+    # example of a sequence of recursive calls:
+    # (depth 2, agent 0) => (depth 2, agent 1) => (depth 2, agent 2) => (d1, a0) => (d1, a1) => (d1, a2) => (d0, a0)
+    if remainingDepth <= 0:
+      return self.evaluationFunction(gameState), Directions.STOP
+    if gameState.isLose() or gameState.isWin():
+      return self.evaluationFunction(gameState), Directions.STOP
+    
+    numAgents = gameState.getNumAgents()
+    isAdversary = (agent != 0)
+    nextRemainingDepth = remainingDepth if agent + 1 < numAgents else remainingDepth - 1
+    nextAgent = agent + 1 if agent + 1 < numAgents else 0
+    
+    actions = gameState.getLegalActions(agent)
+    actions = [a for a in actions if a != Directions.STOP]
+    actionScores = []
+    if len(actions) == 0:
+      return self.evaluationFunction(gameState), Directions.STOP
+    for action in actions:
+      nextGameState = gameState.generateSuccessor(agent, action)
+      score, nextAction = self.evaluateGameStateMinimaxRecursive(nextGameState, nextRemainingDepth, nextAgent)
+      actionScores.append(score)
+    
+    bestActionIndex = actionScores.index(min(actionScores) if isAdversary else max(actionScores))
+    bestAction = actions[bestActionIndex]
+    bestScore = actionScores[bestActionIndex]
+    return bestScore, bestAction
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
   """
@@ -138,7 +169,38 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
       Returns the minimax action using self.depth and self.evaluationFunction
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    score, action = self.evaluateGameStateMinimaxRecursive(gameState, self.depth, 0)
+    #print "Debug: score for the best action (" + str(action) + ")is " + str(score)
+    return action
+  
+  def evaluateGameStateMinimaxRecursive(self, gameState, remainingDepth, agent, pruneIfNotGreaterThan, pruneIfNotLessThan):
+    # returns score, action
+    # example of a sequence of recursive calls:
+    # (depth 2, agent 0) => (depth 2, agent 1) => (depth 2, agent 2) => (d1, a0) => (d1, a1) => (d1, a2) => (d0, a0)
+    if remainingDepth <= 0:
+      return self.evaluationFunction(gameState), Directions.STOP
+    if gameState.isLose() or gameState.isWin():
+      return self.evaluationFunction(gameState), Directions.STOP
+    
+    numAgents = gameState.getNumAgents()
+    isAdversary = (agent != 0)
+    nextRemainingDepth = remainingDepth if agent + 1 < numAgents else remainingDepth - 1
+    nextAgent = agent + 1 if agent + 1 < numAgents else 0
+    
+    actions = gameState.getLegalActions(agent)
+    actions = [a for a in actions if a != Directions.STOP]
+    actionScores = []
+    if len(actions) == 0:
+      return self.evaluationFunction(gameState), Directions.STOP
+    for action in actions:
+      nextGameState = gameState.generateSuccessor(agent, action)
+      score, nextAction = self.evaluateGameStateMinimaxRecursive(nextGameState, nextRemainingDepth, nextAgent)
+      actionScores.append(score)
+    
+    bestActionIndex = actionScores.index(min(actionScores) if isAdversary else max(actionScores))
+    bestAction = actions[bestActionIndex]
+    bestScore = actionScores[bestActionIndex]
+    return bestScore, bestAction
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
   """
