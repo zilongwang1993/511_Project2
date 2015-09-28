@@ -309,6 +309,21 @@ def betterEvaluationFunction(currentGameState):
     evaluation function (question 5).
 
     DESCRIPTION: <write something here so we know what you did>
+    In this method, we implemented a evaluation function that employs a BFS from pacman's new position
+    to find current positions of all the ghosts and food. Then the function evaluates 
+    pacman's current position with the following rule:
+    1. Take the distance from the closest food +1 and divide it by 30 to get food score.
+       This makes sure the closer pacman is to a food the higher the score will be. +1 prevents zero division.
+    2. Find the closest ghost and check the scared times. Divide 300 by its distance from the pacman +1.
+       If this ghost is scared, this ghost score is positive. If the ghost is not scared. score is negative.
+       If the closest ghost is more than 3 units away from the pacman, ghost score is 0.
+       This makes sure that the pacman avoids the ghost at a closer distance by making the weight large (300/dist) 
+       and also makes sure pacman can be fearless when the ghost is scared.
+    3. Add the scared time up as the scared time. This takes the remaining scared time of the ghosts into consideration
+       when evaluating pacman's position.
+
+    4. Add the previous 3 scores and the next position's getScore() together and return the value as pacman's current evaluation. 
+    
   """
   "*** YOUR CODE HERE ***"
   successorGameState = currentGameState
