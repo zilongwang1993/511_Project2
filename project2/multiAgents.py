@@ -372,7 +372,7 @@ def betterEvaluationFunction(currentGameState):
 better = betterEvaluationFunction
 
 def Debug(category, messages):
-  print "Debug: " + str(category) + ": " + " ".join([str(m) for m in messages])
+  print "Debug: " + str(category) + ": " + " ".join([str(m) for m in messages]) #TODO remove this before grading
   pass
 
 def Warning(category, messages):
@@ -1002,7 +1002,7 @@ class ContestAgent(MultiAgentSearchAgent):
         return 400, None
       else:
         return 700, None
-    if (0.3 ** currentDepth) * currentProbability < 0.00005:
+    if (0.3 ** currentDepth) * currentProbability < 0.00003:
       #TODO: no death in small steps != no death/better value
       value = 0
       value += 1.0 * totalScaredTime
@@ -1011,7 +1011,7 @@ class ContestAgent(MultiAgentSearchAgent):
       return value, None
     for nextState, movesId, movesStart, moves, hasCapsule, hasFood in successors:
       successorValue = 0
-      branchingThreshold = 0.3 if currentProbability > 0.1 else 1.0
+      branchingThreshold = 0.3 if currentProbability > 0.05 else 1.0
       distributions = [ghostBehaviours.computeGhostBehaviour(movesId, movesStart, moves, hasCapsule, i, ghostStates[i], branchingThreshold) for i in range(ghostCount)]
       distribution, deathProbability = self.combineGhostDistributions(distributions)
       if hasFood:
@@ -1087,7 +1087,7 @@ class ContestAgent(MultiAgentSearchAgent):
       self.pendingMoves = []
       self.trackingId = 0
       self.time = 0
-      random.seed(16) # TODO remove this
+      random.seed(18) # TODO remove this
     if gameState.getPacmanState().getDirection() == Directions.STOP:
       Debug("ContestAgent-getAction", ("resetting...",))
       self.ghostBehaviours.clearCacheStatistics()
