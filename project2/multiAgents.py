@@ -372,7 +372,7 @@ def betterEvaluationFunction(currentGameState):
 better = betterEvaluationFunction
 
 def Debug(category, messages):
-  print "Debug: " + str(category) + ": " + " ".join([str(m) for m in messages]) #TODO remove this before grading
+  #print "Debug: " + str(category) + ": " + " ".join([str(m) for m in messages]) #TODO remove this before grading
   pass
 
 def Warning(category, messages):
@@ -1020,9 +1020,9 @@ class ContestAgent(MultiAgentSearchAgent):
         successorValue -= len(moves)
       if hasCapsule:
         if totalScaredTime > 20:
-          successorValue -= 600
-        else:
           successorValue -= 300
+        else:
+          successorValue -= 100
       successorValue -= deathProbability * 8000
       if self.trackingId == 4999 and currentDepth == 0:
         print distributions
@@ -1077,6 +1077,27 @@ class ContestAgent(MultiAgentSearchAgent):
       Ghosts don't behave randomly anymore, but they aren't perfect either -- they'll usually
       just make a beeline straight towards Pacman (or away from him if they're scared!)
     """
+    
+    """
+    Description:
+    In the mini-contest problem, we implemented a context agent that utilizes expectimax algorithm with depth of 
+    variable depth (lower depth toward low possibility event) by buildiing a graph and a cache for ghost's
+    actions.
+    1. The graph makes the assumption that pacman will not go backward once it is within a pipe (no exit between the two end points). 
+       This efficiently decreases the searching scope and minizes pacman's decision making process. We also discard those event that have
+       very low chance of happening to trim nodes in the searching process to make it faster.
+    2. For each possible successsor state, we evaluate it based on several different factors: food, ghost's scare time, pellet position,
+       and the winning/loss chances. A score will be calculated for the current state and we use a decay factor to prevent replanning as well
+       as truthfully evaluting the reward of future actions. We only evaluate new actions when pacman reachs a split point, so that he will
+       move swiftly in a pipe.
+    3. To maximize our score in this game, we applied the following tricks:
+        a) Pacman will not eat the last food if there is still pellet remaining. He will go for the pellet and eat as many ghosts as possible 
+        b) We give pellet a bigger score when there is ghost chasing the pacman.
+        c) We set the score of eating a pellet to be negative -100 and -300 to make sure that it is only used when eating ghosts are possible,
+           so that the pellets will not be wasted.
+        
+    """
+    
     "*** YOUR CODE HERE ***"
     if not self.initialized:
       self.initialized = True
@@ -1087,13 +1108,11 @@ class ContestAgent(MultiAgentSearchAgent):
       self.pendingMoves = []
       self.trackingId = 0
       self.time = 0
-      random.seed(18) # TODO remove this
     if gameState.getPacmanState().getDirection() == Directions.STOP:
       Debug("ContestAgent-getAction", ("resetting...",))
       self.ghostBehaviours.clearCacheStatistics()
       self.state = self.topologicalMap.initialState()
       self.pendingMoves = []
-    seed = random.random() # TODO remove this
     if len(self.pendingMoves) == 0:
       state, movesId, moveStart, moves, hasCapsule, hasFood = self.findBestSuccessor(gameState)
       self.state = state
@@ -1101,7 +1120,6 @@ class ContestAgent(MultiAgentSearchAgent):
     move = self.pendingMoves[0]
     self.pendingMoves = self.pendingMoves[1:]
     action = self.actionForMove(move)
-    random.seed(seed) # TODO remove this
     return action
   def actionForMove(self, move):
     return Actions.vectorToDirection(move)
